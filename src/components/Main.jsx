@@ -8,17 +8,15 @@ export default class Main extends Component {
     render() {
     return (
         <Container as="main" role="main">
-            <div className="starter-template">
-                <BrowserRouter>
-                    <Switch>
-                        <Route exact path="/" component={Home} />
-                        <Route exact path="/login" component={Login} />
-                        <Route exact path="/profile" component={Profile} />
-                        <Route exact path="/chat" component={Chat} />
-                        <Route path="/*" component={Page404} />
-                    </Switch>
-                </BrowserRouter>
-            </div>
+            <BrowserRouter>
+                <Switch>
+                    <Route exact path="/" component={Home} />
+                    <Route exact path="/login" component={Login} />
+                    <Route exact path="/profile" component={Profile} />
+                    <Route exact path="/chat" component={Chat} />
+                    <Route path="/*" component={Page404} />
+                </Switch>
+            </BrowserRouter>
         </Container>
     )
     }
