@@ -14,11 +14,11 @@ const intialUsers = [
 
 let users = JSON.parse(localStorage.getItem('users')) || intialUsers;
 let messages = JSON.parse(localStorage.getItem('messages')) || [
-    {userId: 3, message:'falan filan inter milan', datetime: new Date().toISOString() },
-    {userId: 1, message:'falan filan inter milan', datetime: new Date().toISOString() },
-    {userId: 2, message:'falan filan inter milan', datetime: new Date().toISOString() },
-    {userId: 1, message:'falan filan inter milan', datetime: new Date().toISOString() },
-    {userId: 4, message:'falan filan inter milan', datetime: new Date().toISOString() },
+    {id: 0, userId: 3, message:'Hi guys', datetime: '2020-09-02T10:21:12.922Z' },
+    {id: 1, userId: 1, message:'Hello everyone', datetime: '2020-10-02T13:52:12.922Z' },
+    {id: 2, userId: 2, message:'Hallo Leute', datetime: '2020-10-02T17:16:12.922Z' },
+    {id: 3, userId: 1, message:'Oi pessoal', datetime: '2020-10-02T18:32:12.922Z' },
+    {id: 4, userId: 4, message:'Today the weather is rainy, it is raining very hard', datetime: '2020-10-03T13:34:12.922Z' },
 ];
     
 export function configureFakeBackend() {
@@ -99,6 +99,23 @@ export function configureFakeBackend() {
                         // return 401 not authorised if token is null or invalid
                         reject('Unauthorised');
                     }
+
+                    return;
+                }
+
+                // send chat message
+                if (url.endsWith('/message') && opts.method === 'POST') {
+                    // get new user object from post body
+                    let newMessage = JSON.parse(opts.body);
+
+                    // save new user
+                    newMessage.id = messages.length ? Math.max(...messages.map(m => m.id)) + 1 : 1;
+                    newMessage.datetime = new Date().toISOString();
+                    messages.push(newMessage);
+                    localStorage.setItem('messages', JSON.stringify(messages));
+
+                    // respond 200 OK
+                    resolve({ ok: true, text: () => Promise.resolve(JSON.stringify(newMessage)) });
 
                     return;
                 }
