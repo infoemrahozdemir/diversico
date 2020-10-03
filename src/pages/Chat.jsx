@@ -1,296 +1,122 @@
-import React, { Component } from "react";
+import React from 'react';
+import { connect } from 'react-redux';
+import moment from 'moment';
 
-export default class Page extends Component {
-    render() {
+import { userActions, chatActions } from '../actions';
+
+class Home extends React.Component {
+    componentDidMount() {
+        this.props.getUsers();
+        this.props.getMessages();
+    }
+
+    renderIncomingMessage(data, user) {
         return (
-            <div class="messaging">
-                <div class="inbox_msg">
-                    <div class="inbox_people">
-                        <div class="headind_srch">
-                            <div class="recent_heading">
-                                <h4>Recent</h4>
-                            </div>
-                            <div class="srch_bar">
-                                <div class="stylish-input-group">
-                                    <input
-                                        type="text"
-                                        class="search-bar"
-                                        placeholder="Search"
-                                    />
-                                </div>
+            <div className="incoming_msg">
+                <div className="incoming_msg_img">
+                    <img
+                        src={user.image}
+                        alt={user.firstName}
+                    />
+                </div>
+                <div className="received_msg">
+                    <div className="received_withd_msg">
+                        <p>
+                            {data.message}
+                        </p>
+                        <span className="time_date">
+                            {moment(data.datetime).fromNow()}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    renderOutgoingMessage(data, user) {
+        return (
+            <div className="outgoing_msg">
+                <div className="sent_msg">
+                    <p>
+                        {data.message}
+                    </p>
+                    <span className="time_date">
+                        {moment(data.datetime).fromNow()}
+                    </span>
+                </div>
+            </div>
+        );
+    }
+
+    render() {
+        const { user, users, chat } = this.props;
+        console.log("ORKUN", chat, users);
+        return (
+            <div className="messaging">
+                <div className="inbox_msg">
+                    <div className="inbox_people">
+                        <div className="headind_srch">
+                            <div className="recent_heading">
+                                <h4>Users</h4>
                             </div>
                         </div>
-                        <div class="inbox_chat scroll">
-                            <div class="chat_list active_chat">
-                                <div class="chat_people">
-                                    <div class="chat_img">
-                                        {" "}
-                                        <img
-                                            src="https://ptetutorials.com/images/user-profile.png"
-                                            alt="sunil"
-                                        />{" "}
+                        <div className="inbox_chat scroll">
+                            <div className="chat_list active_chat">
+                                {users.loading && <em>Loading users...</em>}
+                                {users.error && <span className="text-danger">ERROR: {users.error}</span>}
+                                {users.items &&
+                                    <div>
+                                        {users.items.filter(u=>u.id !== user.id).map((user, index) =>
+                                        <div key={user.id} className="chat_people">
+                                            <div className="chat_img">
+                                                
+                                                <img
+                                                    src={user.image}
+                                                    alt="sunil"
+                                                />
+                                            </div>
+                                            <div className="chat_ib">
+                                                <h5>
+                                                    {user.firstName + ' ' + user.lastName}
+                                                </h5>
+                                                <p>
+                                                    Test, which is a new approach to
+                                                    have all solutions astrology under
+                                                    one roof.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        )}
                                     </div>
-                                    <div class="chat_ib">
-                                        <h5>
-                                            Sunil Rajput{" "}
-                                            <span class="chat_date">
-                                                Dec 25
-                                            </span>
-                                        </h5>
-                                        <p>
-                                            Test, which is a new approach to
-                                            have all solutions astrology under
-                                            one roof.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="chat_list">
-                                <div class="chat_people">
-                                    <div class="chat_img">
-                                        {" "}
-                                        <img
-                                            src="https://ptetutorials.com/images/user-profile.png"
-                                            alt="sunil"
-                                        />{" "}
-                                    </div>
-                                    <div class="chat_ib">
-                                        <h5>
-                                            Sunil Rajput{" "}
-                                            <span class="chat_date">
-                                                Dec 25
-                                            </span>
-                                        </h5>
-                                        <p>
-                                            Test, which is a new approach to
-                                            have all solutions astrology under
-                                            one roof.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="chat_list">
-                                <div class="chat_people">
-                                    <div class="chat_img">
-                                        {" "}
-                                        <img
-                                            src="https://ptetutorials.com/images/user-profile.png"
-                                            alt="sunil"
-                                        />{" "}
-                                    </div>
-                                    <div class="chat_ib">
-                                        <h5>
-                                            Sunil Rajput{" "}
-                                            <span class="chat_date">
-                                                Dec 25
-                                            </span>
-                                        </h5>
-                                        <p>
-                                            Test, which is a new approach to
-                                            have all solutions astrology under
-                                            one roof.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="chat_list">
-                                <div class="chat_people">
-                                    <div class="chat_img">
-                                        {" "}
-                                        <img
-                                            src="https://ptetutorials.com/images/user-profile.png"
-                                            alt="sunil"
-                                        />{" "}
-                                    </div>
-                                    <div class="chat_ib">
-                                        <h5>
-                                            Sunil Rajput{" "}
-                                            <span class="chat_date">
-                                                Dec 25
-                                            </span>
-                                        </h5>
-                                        <p>
-                                            Test, which is a new approach to
-                                            have all solutions astrology under
-                                            one roof.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="chat_list">
-                                <div class="chat_people">
-                                    <div class="chat_img">
-                                        {" "}
-                                        <img
-                                            src="https://ptetutorials.com/images/user-profile.png"
-                                            alt="sunil"
-                                        />{" "}
-                                    </div>
-                                    <div class="chat_ib">
-                                        <h5>
-                                            Sunil Rajput{" "}
-                                            <span class="chat_date">
-                                                Dec 25
-                                            </span>
-                                        </h5>
-                                        <p>
-                                            Test, which is a new approach to
-                                            have all solutions astrology under
-                                            one roof.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="chat_list">
-                                <div class="chat_people">
-                                    <div class="chat_img">
-                                        {" "}
-                                        <img
-                                            src="https://ptetutorials.com/images/user-profile.png"
-                                            alt="sunil"
-                                        />{" "}
-                                    </div>
-                                    <div class="chat_ib">
-                                        <h5>
-                                            Sunil Rajput{" "}
-                                            <span class="chat_date">
-                                                Dec 25
-                                            </span>
-                                        </h5>
-                                        <p>
-                                            Test, which is a new approach to
-                                            have all solutions astrology under
-                                            one roof.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="chat_list">
-                                <div class="chat_people">
-                                    <div class="chat_img">
-                                        {" "}
-                                        <img
-                                            src="https://ptetutorials.com/images/user-profile.png"
-                                            alt="sunil"
-                                        />{" "}
-                                    </div>
-                                    <div class="chat_ib">
-                                        <h5>
-                                            Sunil Rajput{" "}
-                                            <span class="chat_date">
-                                                Dec 25
-                                            </span>
-                                        </h5>
-                                        <p>
-                                            Test, which is a new approach to
-                                            have all solutions astrology under
-                                            one roof.
-                                        </p>
-                                    </div>
-                                </div>
+                                }
                             </div>
                         </div>
                     </div>
-                    <div class="mesgs">
-                        <div class="msg_history">
-                            <div class="incoming_msg">
-                                <div class="incoming_msg_img">
-                                    {" "}
-                                    <img
-                                        src="https://ptetutorials.com/images/user-profile.png"
-                                        alt="sunil"
-                                    />{" "}
+                    <div className="mesgs">
+
+                        <div className="msg_history">
+                            {
+                                chat.items &&
+                                <div>
+                                    {chat.items.map((message, index) => {
+                                        const messageUser = users.items.find(u=>u.id === message.userId);
+                                        if (message.userId === user.id) return this.renderOutgoingMessage(message, user);
+                                        return this.renderIncomingMessage(message, messageUser);
+                                    }
+                                    )}
                                 </div>
-                                <div class="received_msg">
-                                    <div class="received_withd_msg">
-                                        <p>
-                                            Test which is a new approach to have
-                                            all solutions
-                                        </p>
-                                        <span class="time_date">
-                                            {" "}
-                                            11:01 AM | June 9
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="outgoing_msg">
-                                <div class="sent_msg">
-                                    <p>
-                                        Test which is a new approach to have all
-                                        solutions
-                                    </p>
-                                    <span class="time_date">
-                                        {" "}
-                                        11:01 AM | June 9
-                                    </span>{" "}
-                                </div>
-                            </div>
-                            <div class="incoming_msg">
-                                <div class="incoming_msg_img">
-                                    {" "}
-                                    <img
-                                        src="https://ptetutorials.com/images/user-profile.png"
-                                        alt="sunil"
-                                    />{" "}
-                                </div>
-                                <div class="received_msg">
-                                    <div class="received_withd_msg">
-                                        <p>
-                                            Test, which is a new approach to
-                                            have
-                                        </p>
-                                        <span class="time_date">
-                                            {" "}
-                                            11:01 AM | Yesterday
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="outgoing_msg">
-                                <div class="sent_msg">
-                                    <p>Apollo University, Delhi, India Test</p>
-                                    <span class="time_date">
-                                        {" "}
-                                        11:01 AM | Today
-                                    </span>{" "}
-                                </div>
-                            </div>
-                            <div class="incoming_msg">
-                                <div class="incoming_msg_img">
-                                    {" "}
-                                    <img
-                                        src="https://ptetutorials.com/images/user-profile.png"
-                                        alt="sunil"
-                                    />{" "}
-                                </div>
-                                <div class="received_msg">
-                                    <div class="received_withd_msg">
-                                        <p>
-                                            We work directly with our designers
-                                            and suppliers, and sell direct to
-                                            you, which means quality, exclusive
-                                            products, at a price anyone can
-                                            afford.
-                                        </p>
-                                        <span class="time_date">
-                                            {" "}
-                                            11:01 AM | Today
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                            }
                         </div>
-                        <div class="type_msg">
-                            <div class="input_msg_write">
+                        <div className="type_msg">
+                            <div className="input_msg_write">
                                 <input
                                     type="text"
-                                    class="write_msg"
+                                    className="write_msg"
                                     placeholder="Type a message"
                                 />
-                                <button class="msg_send_btn" type="button">
+                                <button className="msg_send_btn" type="button">
                                     <i
-                                        class="fa fa-paper-plane"
+                                        className="fa fa-paper-plane"
                                         aria-hidden="true"
                                     ></i>
                                 </button>
@@ -302,3 +128,17 @@ export default class Page extends Component {
         );
     }
 }
+
+function mapState(state) {
+    const { users, chat, authentication } = state;
+    const { user } = authentication;
+    return { user, users, chat };
+}
+
+const actionCreators = {
+    getMessages: chatActions.getAll,
+    getUsers: userActions.getAll,
+}
+
+const connectedHomePage = connect(mapState, actionCreators)(Home);
+export default connectedHomePage;

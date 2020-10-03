@@ -2,13 +2,7 @@ import React, { Component } from 'react';
 import {
     Navbar,
     Nav,
-    Dropdown,
-    Form,
-    Button,
-    NavDropdown,
 } from 'react-bootstrap';
-import { HashRouter, Route, Switch } from 'react-router-dom';
-
 
 export default class Navigator extends Component {
     render() {
