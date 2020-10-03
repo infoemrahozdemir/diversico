@@ -129,9 +129,7 @@ class Home extends React.Component {
                                                     {user.firstName + ' ' + user.lastName}
                                                 </h5>
                                                 <p>
-                                                    Test, which is a new approach to
-                                                    have all solutions astrology under
-                                                    one roof.
+                                                    
                                                 </p>
                                             </div>
                                         </div>
