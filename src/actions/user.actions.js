@@ -1,8 +1,7 @@
 import { userConstants } from '../constants';
 import { userService } from '../services';
 import { alertActions } from '.';
-import { history } from '../helpers';
-
+import { history, socket } from '../helpers';
 
 function login(username, password) {
     return dispatch => {
@@ -12,6 +11,7 @@ function login(username, password) {
             .then(
                 user => { 
                     dispatch(success(user));
+                    socket.login(user);
                     history.push('/');
                     //window.location = '/';
                 },
@@ -29,6 +29,7 @@ function login(username, password) {
 
 function logout() {
     userService.logout();
+    socket.disconnect();
     return { type: userConstants.LOGOUT };
 }
 
@@ -48,9 +49,13 @@ function getAll() {
     function failure(error) { return { type: userConstants.GETALL_FAILURE, error } }
 }
 
+function updateUserList(data) {
+    return { type: userConstants.UPDATE_USERS_LIST, data } 
+}
 
 export const userActions = {
     login,
     logout,
     getAll,
+    updateUserList,
 };

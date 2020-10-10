@@ -8,7 +8,9 @@ export function users(state = {}, action) {
       };
     case userConstants.GETALL_SUCCESS:
       return {
-        items: action.users
+        ...state,
+        items: action.users,
+        loading: false,
       };
     case userConstants.GETALL_FAILURE:
       return { 
@@ -43,6 +45,12 @@ export function users(state = {}, action) {
 
           return user;
         })
+      };
+    case userConstants.UPDATE_USERS_LIST:
+      // remove 'deleting:true' property and add 'deleteError:[error]' property to user 
+      return {
+        ...state,
+        onlineUsers: action.data.users
       };
     default:
       return state

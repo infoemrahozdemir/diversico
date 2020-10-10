@@ -22,6 +22,7 @@ function getAll() {
 function addMessage(data) {
     return { type: chatConstants.ADD_MESSAGE_SUCCESS, data } 
 }
+
 function sendMessage(userId, message) {
     return dispatch => {
         dispatch(request({ userId, message }));

@@ -116,7 +116,7 @@ class Home extends React.Component {
                                 {users.items &&
                                     <div>
                                         {users.items.filter(u=>u.id !== user.id).map((user, index) =>
-                                        <div key={user.id} className="chat_people">
+                                        <div key={user.id} className="chat_people border-bottom pb-1">
                                             <div className="chat_img">
                                                 
                                                 <img
@@ -125,12 +125,17 @@ class Home extends React.Component {
                                                 />
                                             </div>
                                             <div className="chat_ib">
-                                                <h5>
+                                                <h5 style={{ marginBottom: 0}}>
                                                     {user.firstName + ' ' + user.lastName}
                                                 </h5>
-                                                <p>
-                                                    
-                                                </p>
+                                                { users.onlineUsers && users.onlineUsers.find(r => r.userId === user.id) &&
+                                                <>
+                                                    <span className="badge badge-success mr-1">Online</span>
+                                                    <a className="badge badge-success" href="/">
+                                                        Call
+                                                    </a>
+                                                </>
+                                                }
                                             </div>
                                         </div>
                                         )}

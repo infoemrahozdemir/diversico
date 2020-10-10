@@ -1,9 +1,11 @@
 import io from 'socket.io-client';
 import { store } from './store';
-import { chatActions } from '../actions';
+import { chatActions, userActions } from '../actions';
 
-const NEW_CHAT_MESSAGE_EVENT = "newChatMessage"; // Name of the event
 const SOCKET_SERVER_URL = "http://localhost:4000";
+const NEW_CHAT_MESSAGE_EVENT = "newChatMessage"; // Name of the event
+const UPDATE_USERS_LIST = "updateUserList";
+const USER_LOGIN = "userLogin";
 
 export const socket = io(SOCKET_SERVER_URL, { autoConnect: true });
 
@@ -18,6 +20,11 @@ socket.onevent = function (packet) {
 
 socket.on('connect', () => {
     console.log('SOCKET CONNECTED');
+    const user = localStorage.getItem('user');
+    if(user){
+        const { id } = JSON.parse(user);
+        socket.emit(USER_LOGIN, { userId: id });
+    }
 });
 
 socket.on('disconnect', () => {
@@ -28,7 +35,14 @@ socket.on('disconnect', () => {
 socket.on(NEW_CHAT_MESSAGE_EVENT, (message) => {
     store.dispatch(chatActions.addMessage(message));
 });
+socket.on(UPDATE_USERS_LIST, (onlineUsers) => {
+    store.dispatch(userActions.updateUserList(onlineUsers));
+});
 
 socket.sendMessage = ({ userId, message }) => {
     socket.emit(NEW_CHAT_MESSAGE_EVENT, { userId, message });
+};
+
+socket.login = ({ userId }) => {
+    socket.emit(USER_LOGIN, { userId });
 };
