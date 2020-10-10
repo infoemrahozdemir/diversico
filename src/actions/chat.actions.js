@@ -1,5 +1,7 @@
 import { chatConstants } from '../constants';
 import { chatService } from '../services';
+import { socket } from '../helpers';
+
 
 function getAll() {
     return dispatch => {
@@ -17,6 +19,9 @@ function getAll() {
     function failure(error) { return { type: chatConstants.GETALL_FAILURE, error } }
 }
 
+function addMessage(data) {
+    return { type: chatConstants.ADD_MESSAGE_SUCCESS, data } 
+}
 function sendMessage(userId, message) {
     return dispatch => {
         dispatch(request({ userId, message }));
@@ -25,6 +30,7 @@ function sendMessage(userId, message) {
             .then(
                 result => { 
                     dispatch(success(result));
+                    socket.sendMessage({ userId, message });
                 },
                 error => {
                     dispatch(failure(error.toString()));
@@ -40,4 +46,5 @@ function sendMessage(userId, message) {
 export const chatActions = {
     getAll,
     sendMessage,
+    addMessage,
 };

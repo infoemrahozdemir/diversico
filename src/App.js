@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Router, Route, Switch, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import { history } from './helpers';
+import { history, socket } from './helpers';
 import { alertActions } from './actions';
 import { PrivateRoute } from './components';
 import { Home, Login, Profile, Chat } from './pages';
@@ -21,6 +21,8 @@ class App extends Component {
         // clear alert on location change
         this.props.clearAlerts();
     });
+
+    socket.open();
   }
   render() {
     const { alert } = this.props;

@@ -33,7 +33,7 @@ class Home extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if(nextProps.chat.items && nextProps.chat.items.length>0 && this.state.chatLoaded === false){
+        if(nextProps.chat.items && nextProps.chat.items.length>0 && (this.state.chatLoaded === false || nextProps.chat.scrollDown) ){
             scrollBottom({ element: this.myRef.current });
             this.setState({chatLoaded: true});
         }

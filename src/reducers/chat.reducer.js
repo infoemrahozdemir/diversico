@@ -16,9 +16,13 @@ export function chat(state = {}, action) {
         error: action.error
       };
     case chatConstants.SEND_MESSAGE_SUCCESS:
+      return state;
+    case chatConstants.ADD_MESSAGE_SUCCESS:
+      const id = state.items.length ? Math.max(...state.items.map(m => m.id)) + 1 : 1;
       return {
         ...state,
-        items: [ ...state.items, action.data ],
+        scrollDown: true,
+        items: [ ...state.items, { id, ...action.data } ],
       };
     default:
       return state
