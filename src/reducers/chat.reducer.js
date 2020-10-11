@@ -24,6 +24,18 @@ export function chat(state = {}, action) {
         scrollDown: true,
         items: [ ...state.items, { id, ...action.data } ],
       };
+    case chatConstants.CALL_MADE:
+      return {
+        ...state,
+        callMade: true,
+        callerData: action.data,
+      };
+    case chatConstants.ANSWER_MADE:
+      return {
+        ...state,
+        answerMade: true,
+        answerData: action.data,
+      };
     default:
       return state
   }

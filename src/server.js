@@ -23,7 +23,7 @@ io.on("connection", (socket) => {
     io.in(ROOM_ID).emit(NEW_CHAT_MESSAGE_EVENT, data);
   });
   socket.on(USER_LOGIN, (data) => {
-    console.log("user login :", data);
+    console.log("user login :", data, socket.id);
 
     const existingSocket = activeSockets.find(
       existingSocket => existingSocket.socketId === socket.id
@@ -43,6 +43,35 @@ io.on("connection", (socket) => {
       });
     }
 
+  });
+
+
+  socket.on("call-user", (data) => {
+    const callingUser = activeSockets.find(
+      existingSocket => existingSocket.userId === data.to
+    );
+    if(callingUser){
+      socket.to(callingUser.socketId).emit("call-made", {
+        offer: data.offer,
+        socket: callingUser.socketId,
+        from: data.from,
+        to: data.to,
+      });
+    }
+  });
+
+  socket.on("make-answer", data => {
+    console.log("make-answer", data);
+    socket.to(data.to).emit("answer-made", {
+      socket: socket.id,
+      answer: data.answer
+    });
+  });
+
+  socket.on("reject-call", data => {
+    socket.to(data.from).emit("call-rejected", {
+      socket: socket.id
+    });
   });
 
   // Leave the room if the user closes the socket

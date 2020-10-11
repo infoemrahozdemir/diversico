@@ -46,3 +46,18 @@ socket.sendMessage = ({ userId, message }) => {
 socket.login = ({ userId }) => {
     socket.emit(USER_LOGIN, { userId });
 };
+
+socket.callUser = ({ offer, from, to }) => {
+    socket.emit('call-user', { offer, from, to });
+};
+socket.makeAnswer = async (data) => {
+    console.log('socket.makeAnswer', data);
+    socket.emit("make-answer", {
+        answer: data.answer,
+        to: data.user.socketId
+    });
+};
+
+socket.on("call-made", async data => {
+    store.dispatch(chatActions.callMade(data));
+});

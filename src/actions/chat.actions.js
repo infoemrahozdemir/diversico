@@ -44,8 +44,17 @@ function sendMessage(userId, message) {
     function failure(error) { return { type: chatConstants.SEND_MESSAGE_FAILURE, error } }
 }
 
+function callMade(data) {
+    return { type: chatConstants.CALL_MADE, data } 
+}
+function answerMade(data) {
+    return { type: chatConstants.ANSWER_MADE, data } 
+}
+
 export const chatActions = {
     getAll,
     sendMessage,
     addMessage,
+    callMade,
+    answerMade,
 };

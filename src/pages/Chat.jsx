@@ -1,14 +1,32 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import moment from 'moment';
+import { Modal, Button } from 'react-bootstrap';
 
 import { userActions, chatActions } from '../actions';
+import { socket } from '../helpers';
+
 
 const scrollBottom = ({ element, lastPosition = 0 }) => {
     setTimeout(() => {
         element.scrollTop = element.scrollHeight - lastPosition;
     });
 };
+
+const { RTCPeerConnection, RTCSessionDescription } = window;
+
+const servers = {
+    iceServers: [
+        {
+            urls: [
+                'stun:stun1.l.google.com:19302',
+                'stun:stun2.l.google.com:19302',
+            ],
+        },
+    ],
+    iceCandidatePoolSize: 10,
+};
+
 
 class Home extends React.Component {
 
@@ -18,18 +36,43 @@ class Home extends React.Component {
         this.state = {
             message: '',
             chatLoaded: false,
+            showModal: false,
+            selectedUser: {},
+
+            startDisabled: false,
+            callDisabled: true,
+            hangUpDisabled: true,
+            localStream: null,
+            peerConnection: null,
         };
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleModalClose = this.handleModalClose.bind(this);
+        this.handleModalOnEnter = this.handleModalOnEnter.bind(this);
+        this.handleStart = this.handleStart.bind(this);
+        this.handleCall = this.handleCall.bind(this);
+        this.handleAnswer = this.handleAnswer.bind(this);
+        this.handleHangUp = this.handleHangUp.bind(this);
+        this.gotStream = this.gotStream.bind(this);
+        this.gotRemoteStream = this.gotRemoteStream.bind(this);
 
         this.myRef = React.createRef();
+        this.localVideoRef = React.createRef();
+        this.remoteVideoRef = React.createRef();
     }
 
     componentDidMount() {
         this.props.getUsers();
         this.props.getMessages();
         scrollBottom({ element: this.myRef.current });
+
+        socket.on("answer-made", async data => {
+            const { peerConnection } = this.state;
+
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+        });
+
     }
 
     componentWillReceiveProps(nextProps) {
@@ -37,11 +80,130 @@ class Home extends React.Component {
             scrollBottom({ element: this.myRef.current });
             this.setState({chatLoaded: true});
         }
+
+        if(nextProps.chat.callMade){
+            this.setState({showModal: true});
+        }
+    }
+
+    // When you click the Start button, we ask for audio/video permissions and start a localStream.
+    handleStart () {
+        this.setState({
+            startDisabled: true
+        });
+        
+        navigator.mediaDevices
+            .getUserMedia({
+                audio: true,
+                video: true
+            })
+            .then(this.gotStream)
+            .catch(e => alert("getUserMedia() error:" + e));
+        
+    };
+
+    gotStream (stream) {
+                
+        const { peerConnection } = this.state;
+
+        this.localVideoRef.current.srcObject = stream;
+
+        console.log("localStream", stream);
+
+
+        stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
+
+        this.setState({
+            callDisabled: false,
+            localStream: stream
+        });
+    };
+
+    gotRemoteStream (event) {
+        const remoteVideo = this.remoteVideoRef.current;
+        if (remoteVideo.srcObject !== event.streams[0]) {
+        console.log("remoteStream", event.streams[0]);
+            remoteVideo.srcObject = event.streams[0];
+        }
+    };
+
+
+    async handleCall () {
+        this.setState({
+            callDisabled: true,
+            hangUpDisabled: false
+        });
+        const { selectedUser, peerConnection } = this.state;
+        const { user } = this.props;
+        
+        //initiliaze
+        await peerConnection.setLocalDescription();
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(new RTCSessionDescription(offer));
+        socket.callUser({ offer: offer, from: user.id, to: selectedUser.id });
+
+
+        
+    };
+
+    handleHangUp () {
+        const { peerConnection } = this.state;
+
+        if (peerConnection) {
+            const senders = peerConnection.getSenders();
+            senders.forEach((sender) => peerConnection.removeTrack(sender));
+            peerConnection.close();
+        }
+        
+        this.setState({
+            startDisabled: false,
+            callDisabled: true,
+            hangUpDisabled: true,
+            showModal: false,
+        });
+    };
+
+    async handleAnswer () {
+        const { users, chat } = this.props;
+        const { peerConnection } = this.state;
+
+        const userInfo = users.onlineUsers.find(u => u.userId === chat.callerData.from);
+        
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(chat.callerData.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(new RTCSessionDescription(answer));
+
+        await socket.makeAnswer({answer, user: userInfo});
+
+        this.setState({
+            hangUpDisabled: false,
+            callDisabled: true
+        });
+
+    };
+
+    handleModalClose(e) {
+        this.handleHangUp();
+        this.setState({ showModal: false });
+    }
+    
+    handleModalOnEnter(e) {
+        const peerConnection = new RTCPeerConnection(servers);
+        peerConnection.ontrack = this.gotRemoteStream;
+
+        this.setState({
+            peerConnection
+        });
     }
 
     handleChange(e) {
         const { name, value } = e.target;
         this.setState({ [name]: value });
+    }
+
+    callUser(user) {
+
+        this.setState({ showModal: true, selectedUser: user });
     }
 
     handleSubmit(e) {
@@ -98,8 +260,10 @@ class Home extends React.Component {
 
     render() {
         const { user, users, chat } = this.props;
-        const { message } = this.state;
+        const { message, showModal, selectedUser, startDisabled, callDisabled, hangUpDisabled } = this.state;
 
+        const userInfo = chat.callMade ? users.items.find(u => u.id === chat.callerData.from) : selectedUser;
+        
         return (
             <div className="messaging">
                 <div className="inbox_msg">
@@ -131,9 +295,7 @@ class Home extends React.Component {
                                                 { users.onlineUsers && users.onlineUsers.find(r => r.userId === user.id) &&
                                                 <>
                                                     <span className="badge badge-success mr-1">Online</span>
-                                                    <a className="badge badge-success" href="/">
-                                                        Call
-                                                    </a>
+                                                    <button className="btn btn-link" onClick={() => this.callUser(user)}>Call</button>
                                                 </>
                                                 }
                                             </div>
@@ -180,6 +342,72 @@ class Home extends React.Component {
                         </div>
                     </div>
                 </div>
+                { selectedUser &&
+                <Modal
+                    size="lg"
+                    aria-labelledby="contained-modal-title-vcenter"
+                    centered
+                    show={showModal}
+                    backdrop="static"
+                    keyboard={false}
+                    onEnter={this.handleModalOnEnter}
+                    onHide={this.handleModalClose}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Video Chat with : { userInfo.firstName } { userInfo.lastName }</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div>
+                            <video
+                                ref={this.localVideoRef}
+                                id="orkun1"
+                                autoPlay
+                                muted
+                                style={{
+                                    width: "48%",
+                                    height: "200px",
+                                    border: "1px solid gray",
+                                }}
+                            />
+                            <video
+                                ref={this.remoteVideoRef}
+                                id="orkun2"
+                                autoPlay
+                                style={{
+                                    width: "48%",
+                                    height: "200px",
+                                    border: "1px solid gray",
+                                }}
+                            />
+                        </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="primary" onClick={this.handleStart} disabled={startDisabled}>
+                            Open Camera
+                        </Button>
+                        {
+                            !chat.callMade &&
+                            <Button variant="primary" onClick={this.handleCall} disabled={callDisabled}>
+                                Call
+                            </Button>
+                        }
+                        {
+                            chat.callMade &&
+                            <Button variant="primary" onClick={this.handleAnswer} disabled={callDisabled}>
+                                Answer
+                            </Button>
+                        }
+                        <Button variant="primary" onClick={this.handleHangUp} disabled={hangUpDisabled}>
+                            Hangup
+                        </Button>
+                        {
+                            !chat.callMade &&
+                            <Button variant="danger" onClick={this.handleModalClose}>
+                                Close
+                            </Button>
+                        }
+                    </Modal.Footer>
+                </Modal>
+                }
             </div>
         );
     }
