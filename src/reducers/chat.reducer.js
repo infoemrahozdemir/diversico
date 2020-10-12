@@ -30,6 +30,13 @@ export function chat(state = {}, action) {
         callMade: true,
         callerData: action.data,
       };
+    case chatConstants.HANGUP:
+      const newState = state;
+      delete newState.callMade;
+      delete newState.callerData;
+      return {
+        ...newState,
+      };
     case chatConstants.ANSWER_MADE:
       return {
         ...state,

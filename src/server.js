@@ -74,6 +74,18 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("hangup", data => {
+    console.log("hangup", data);
+    const callingUser = activeSockets.find(
+      existingSocket => existingSocket.userId === data.to
+    );
+    if(callingUser){
+      socket.to(callingUser.socketId).emit("hangup", {
+        socket: socket.id
+      });
+    }
+  });
+
   // Leave the room if the user closes the socket
   socket.on("disconnect", () => {
     socket.leave(ROOM_ID);

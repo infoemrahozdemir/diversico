@@ -73,6 +73,12 @@ class Home extends React.Component {
             await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
         });
 
+        socket.on("hangup", data => {
+            this.props.hangup();
+            this.setState({
+                showModal: false,
+            });
+        });
     }
 
     componentWillReceiveProps(nextProps) {
@@ -108,9 +114,6 @@ class Home extends React.Component {
 
         this.localVideoRef.current.srcObject = stream;
 
-        console.log("localStream", stream);
-
-
         stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
 
         this.setState({
@@ -122,7 +125,6 @@ class Home extends React.Component {
     gotRemoteStream (event) {
         const remoteVideo = this.remoteVideoRef.current;
         if (remoteVideo.srcObject !== event.streams[0]) {
-        console.log("remoteStream", event.streams[0]);
             remoteVideo.srcObject = event.streams[0];
         }
     };
@@ -147,13 +149,19 @@ class Home extends React.Component {
     };
 
     handleHangUp () {
-        const { peerConnection } = this.state;
+        const { selectedUser, peerConnection } = this.state;
+        const { users, chat } = this.props;
+
 
         if (peerConnection) {
             const senders = peerConnection.getSenders();
             senders.forEach((sender) => peerConnection.removeTrack(sender));
             peerConnection.close();
         }
+
+        const userInfo = chat.callMade ? users.items.find(u => u.id === chat.callerData.from) : selectedUser;
+        socket.hangup(userInfo);
+
         
         this.setState({
             startDisabled: false,
@@ -186,7 +194,7 @@ class Home extends React.Component {
         this.handleHangUp();
         this.setState({ showModal: false });
     }
-    
+
     handleModalOnEnter(e) {
         const peerConnection = new RTCPeerConnection(servers);
         peerConnection.ontrack = this.gotRemoteStream;
@@ -422,6 +430,7 @@ function mapState(state) {
 const actionCreators = {
     sendMessage: chatActions.sendMessage,
     getMessages: chatActions.getAll,
+    hangup: chatActions.hangup,
     getUsers: userActions.getAll,
 }
 

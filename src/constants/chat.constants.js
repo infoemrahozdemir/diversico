@@ -11,4 +11,5 @@ export const chatConstants = {
 
     CALL_MADE: 'CHAT_CALL_MADE',
     ANSWER_MADE: 'CHAT_ANSWER_MADE',
+    HANGUP: 'CHAT_HANGUP',
 };

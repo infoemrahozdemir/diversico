@@ -50,8 +50,11 @@ socket.login = ({ userId }) => {
 socket.callUser = ({ offer, from, to }) => {
     socket.emit('call-user', { offer, from, to });
 };
+socket.hangup = (user) => {
+    socket.emit('hangup', { to: user.id });
+    store.dispatch(chatActions.hangup(user));
+};
 socket.makeAnswer = async (data) => {
-    console.log('socket.makeAnswer', data);
     socket.emit("make-answer", {
         answer: data.answer,
         to: data.user.socketId

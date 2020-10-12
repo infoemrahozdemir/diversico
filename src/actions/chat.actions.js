@@ -47,6 +47,9 @@ function sendMessage(userId, message) {
 function callMade(data) {
     return { type: chatConstants.CALL_MADE, data } 
 }
+function hangup(data) {
+    return { type: chatConstants.HANGUP, data } 
+}
 function answerMade(data) {
     return { type: chatConstants.ANSWER_MADE, data } 
 }
@@ -57,4 +60,5 @@ export const chatActions = {
     addMessage,
     callMade,
     answerMade,
+    hangup,
 };
